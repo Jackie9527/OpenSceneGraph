@@ -66,8 +66,10 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
 
         if (filename.compare(0, 5, "/dev/")==0)
         {
-#ifdef ANDROID
+#if defined ANDROID
             throw std::runtime_error("Device not supported on Android");
+#elif defined __OHOS__
+            throw std::runtime_error("Device not supported on OHOS");
 #else
             avdevice_register_all();
 

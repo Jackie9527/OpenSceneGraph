@@ -9,7 +9,7 @@ SET(OPENTHREADS_SOVERSION 21)
 
 SET(OPENTHREADS_VERSION ${OPENTHREADS_MAJOR_VERSION}.${OPENTHREADS_MINOR_VERSION}.${OPENTHREADS_PATCH_VERSION})
 
-IF(NOT ANDROID)
+IF(NOT ANDROID AND NOT OHOS)
     INCLUDE(CheckAtomicOps)
 ENDIF()
 
@@ -73,7 +73,7 @@ SET(OpenThreads_PUBLIC_HEADERS
     ${OPENTHREADS_CONFIG_HEADER}
 )
 
-IF(NOT ANDROID)
+IF(NOT ANDROID AND NOT OHOS)
 # Use our modified version of FindThreads.cmake which has Sproc hacks.
     FIND_PACKAGE(Threads)
 ENDIF()
@@ -84,7 +84,7 @@ IF(QT4_FOUND OR Qt5Widgets_FOUND)
 ENDIF()
 
 # Maybe we should be using the FindThreads.cmake module?
-IF(ANDROID)
+IF(ANDROID OR OHOS)
     SUBDIRS(pthreads)
 ELSEIF(WIN32)
     # So I think Cygwin wants to use pthreads

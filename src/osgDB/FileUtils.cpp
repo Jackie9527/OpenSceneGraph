@@ -99,6 +99,10 @@ typedef char TCHAR;
     #define stat64 stat
 #endif
 
+#if defined(__OHOS__)
+    #define stat64 stat
+#endif
+
     // set up _S_ISDIR()
 #if !defined(S_ISDIR)
 #  if defined( _S_IFDIR) && !defined( __S_IFDIR)

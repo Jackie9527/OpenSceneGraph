@@ -26,11 +26,11 @@
 #endif
 #include <limits.h>
 
-#if defined __linux__ || defined __sun || defined __APPLE__ || ANDROID
+#if defined __linux__ || defined __sun || defined __APPLE__ || ANDROID || defined __OHOS__
 #include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#if !defined ANDROID
+#if !defined ANDROID && !defined __OHOS__
     #include <sys/unistd.h>
 #endif
 #endif
@@ -48,12 +48,18 @@
 #endif
 #endif
 
-#if defined(__APPLE__) || defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__ANDROID__)
+#if defined(__APPLE__) || defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__ANDROID__) || defined(__OHOS__)
 #   include <unistd.h>
 #   include <sys/syscall.h>
 #endif
 
 #if defined(__ANDROID__)
+    #ifndef PAGE_SIZE
+        #define PAGE_SIZE 0x400
+    #endif
+#endif
+
+#if defined(__OHOS__)
     #ifndef PAGE_SIZE
         #define PAGE_SIZE 0x400
     #endif
@@ -469,6 +475,8 @@ size_t Thread::CurrentThreadId()
 #if defined(__APPLE__)
   return (size_t)::syscall(SYS_thread_selfid);
 #elif defined(__ANDROID__)
+  return (size_t)gettid();
+#elif defined(__OHOS__)
   return (size_t)gettid();
 #elif defined(__linux__)
   return (size_t)::syscall(SYS_gettid);
@@ -995,7 +1003,7 @@ int Thread::YieldCurrentThread()
 //
 int Thread::microSleep(unsigned int microsec)
 {
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(__OHOS__)
     return ::usleep(microsec);
 #else
     ::usleep(microsec);

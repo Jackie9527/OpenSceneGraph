@@ -62,7 +62,7 @@ SET(LIB_COMMON_FILES
 # Collect all the configuration files
 SET(LIB_EXTRA_LIBS)
 
-IF(WIN32 AND NOT ANDROID)
+IF(WIN32 AND NOT ANDROID AND NOT OHOS)
     #
     # Enable workaround for OpenGL driver issues when used in multithreaded/multiscreen with NVidia drivers on Windows XP
     # For example: osgviewer dumptruck.osg was showing total garbage (screen looked like shattered, splashed hedgehog)
@@ -95,7 +95,7 @@ IF(WIN32 AND NOT ANDROID)
         )
     ENDIF()
 ELSE()
-    IF(ANDROID)
+    IF(ANDROID OR OHOS)
       SET(OSG_WINDOWING_SYSTEM "None" CACHE STRING "None Windowing system type for graphics window creation.")
     ELSE()
       SET(OSG_WINDOWING_SYSTEM "X11" CACHE STRING "Windowing system type for graphics window creation. options only X11")

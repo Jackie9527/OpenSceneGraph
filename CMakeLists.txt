@@ -57,6 +57,8 @@ PROJECT(OpenSceneGraph)
 
 IF(ANDROID)
     SET(OSG_WINDOWING_SYSTEM "None" CACHE STRING "Windowing system type for graphics window creation; options: None.")
+ELSEIF(OHOS)
+    SET(OSG_WINDOWING_SYSTEM "None" CACHE STRING "Windowing system type for graphics window creation; options: None.")
 ELSEIF(WIN32 OR MINGW)
     SET(OSG_WINDOWING_SYSTEM "Win32" CACHE STRING "Windowing system type for graphics window creation; options: Win32 or None.")
 ELSEIF(APPLE)
@@ -176,7 +178,7 @@ ENDIF()
 # cases. With IRIX, we're going to hope explicit linking to the underlying
 # library is not necessary. We currently don't case for pthreads on Windows
 # which might be an issue on things like Cygwin. This may need to be fixed.
-IF(NOT ANDROID)
+IF(NOT ANDROID AND NOT OHOS)
     FIND_PACKAGE(Threads)
 ENDIF()
 IF(CMAKE_SYSTEM MATCHES IRIX)
@@ -236,7 +238,7 @@ IF (OSG_MAINTAINER)
 
 ENDIF()
 
-IF(NOT ANDROID)
+IF(NOT ANDROID AND NOT OHOS)
 IF(APPLE)
 
     IF(OSG_BUILD_PLATFORM_IPHONE)
@@ -309,7 +311,7 @@ ENDIF()
 
 
 
-IF(UNIX AND NOT ANDROID)
+IF(UNIX AND NOT ANDROID AND NOT OHOS)
     # Not sure what this will do on Cygwin and Msys
     # Also, remember OS X X11 is a user installed option so it may not exist.
     FIND_PACKAGE(X11)
@@ -342,7 +344,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${OPENGL_INCLUDE_DIR})
 # Platform specific definitions
 
 
-IF(WIN32 AND NOT ANDROID)
+IF(WIN32 AND NOT ANDROID AND NOT OHOS)
     OPTION(OSG_DETERMINE_WIN_VERSION "Wheter to automatically determine current Windows version" ON)
 
     IF(OSG_DETERMINE_WIN_VERSION)
@@ -431,7 +433,7 @@ IF(WIN32 AND NOT ANDROID)
             SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "/debug /INCREMENTAL:NO")
         ENDIF(NOT OSG_MSVC_DEBUG_INCREMENTAL_LINK)
     ENDIF(MSVC)
-ENDIF(WIN32 AND NOT ANDROID)
+ENDIF(WIN32 AND NOT ANDROID AND NOT OHOS)
 
 ########################################################################################################
 ##### these were settings located in SetupCommon.cmake used in Luigi builds.... find out what are useful
@@ -532,7 +534,7 @@ ENDIF()
 
 OPTION(OSG_GL_LIBRARY_STATIC "Set to ON to statically link with OpenGL/GLES library." OFF)
 
-IF (OSG_BUILD_PLATFORM_IPHONE OR ANDROID)
+IF (OSG_BUILD_PLATFORM_IPHONE OR ANDROID OR OHOS)
     OPTION(OSG_TEXT_USE_FONTCONFIG "Set to ON to enable attempt to use FontConfig in osgText." OFF)
 ELSE ()
     OPTION(OSG_TEXT_USE_FONTCONFIG "Set to OFF to disable attempt to use FontConfig in osgText." ON)
@@ -590,7 +592,7 @@ IF (OSG_GL3_AVAILABLE)
 
     ENDIF()
 ELSEIF(OSG_GLES1_AVAILABLE)
-    IF (APPLE AND NOT ANDROID)
+    IF (APPLE AND NOT ANDROID AND NOT OHOS)
         SET(OPENGL_HEADER1 "#include \"TargetConditionals.h\"" CACHE STRING "#include<> line for OpenGL Header")
         SET(OPENGL_HEADER2 "#include <OpenGLES/ES1/gl.h>" CACHE STRING "#include<> line for additional OpenGL Headers if required")
     ELSE()
@@ -598,7 +600,7 @@ ELSEIF(OSG_GLES1_AVAILABLE)
         SET(OPENGL_HEADER2 "" CACHE STRING "#include<> line for additional OpenGL Headers if required")
     ENDIF()
 ELSEIF(OSG_GLES2_AVAILABLE)
-    IF (APPLE AND NOT ANDROID)
+    IF (APPLE AND NOT ANDROID AND NOT OHOS)
         SET(OPENGL_HEADER1 "#include \"TargetConditionals.h\"" CACHE STRING "#include<> line for OpenGL Header")
         SET(OPENGL_HEADER2 "#include <OpenGLES/ES2/gl.h>" CACHE STRING "#include<> line for additional OpenGL Headers if required")
     ELSE()
@@ -606,7 +608,7 @@ ELSEIF(OSG_GLES2_AVAILABLE)
         SET(OPENGL_HEADER2 "" CACHE STRING "#include<> line for additional OpenGL Headers if required")
     ENDIF()
 ELSEIF(OSG_GLES3_AVAILABLE)
-    IF (APPLE AND NOT ANDROID)
+    IF (APPLE AND NOT ANDROID AND NOT OHOS)
         SET(OPENGL_HEADER1 "#include \"TargetConditionals.h\"" CACHE STRING "#include<> line for OpenGL Header")
         SET(OPENGL_HEADER2 "#include <OpenGLES/ES3/gl.h>" CACHE STRING "#include<> line for additional OpenGL Headers if required")
     ELSE()
@@ -686,6 +688,30 @@ IF(ANDROID)
     ENDIF()
 ENDIF()
 
+IF(OHOS)
+    IF(OSG_GLES1_AVAILABLE)
+        FIND_PATH(OPENGL_INCLUDE_DIR GLES/gl.h
+              PATHS
+              ${CMAKE_SYSROOT}/usr/include)
+        FIND_LIBRARY(OPENGL_gl_LIBRARY  GLESv1_CM
+                 PATHS
+                     ${CMAKE_SYSROOT}/usr/lib)
+    ELSEIF(OSG_GLES2_AVAILABLE)
+        FIND_PATH(OPENGL_INCLUDE_DIR GLES2/gl2.h
+              PATHS
+              ${CMAKE_SYSROOT}/usr/include)
+        FIND_LIBRARY(OPENGL_gl_LIBRARY  GLESv2
+                 PATHS
+                     ${CMAKE_SYSROOT}/usr/lib)
+    ELSEIF(OSG_GLES3_AVAILABLE)
+        FIND_PATH(OPENGL_INCLUDE_DIR GLES3/gl3.h
+              PATHS
+              ${CMAKE_SYSROOT}/usr/include)
+        FIND_LIBRARY(OPENGL_gl_LIBRARY  GLESv3
+                 PATHS
+                     ${CMAKE_SYSROOT}/usr/lib)
+    ENDIF()
+ENDIF()
 
 ################################################################################
 # Set Config header file
@@ -755,7 +781,7 @@ mark_as_advanced(BUILD_OSG_PLUGINS)
 # 3rd Party Dependency Stuff
 OPTION(OSG_FIND_3RD_PARTY_DEPS "Enable to search for Android or Windows dependencies in ./3rdparty" ON)
 
-IF(WIN32 AND NOT ANDROID AND OSG_FIND_3RD_PARTY_DEPS)
+IF(WIN32 AND NOT ANDROID AND NOT OHOS AND OSG_FIND_3RD_PARTY_DEPS)
     INCLUDE(Find3rdPartyDependencies)
 ENDIF()
 
@@ -768,6 +794,9 @@ OPTION(OSG_USE_LOCAL_LUA_SOURCE "Enable to use local Lua source when building th
 #
 IF(ANDROID AND OSG_FIND_3RD_PARTY_DEPS)
     ANDROID_3RD_PARTY()
+ELSEIF(OHOS AND OSG_FIND_3RD_PARTY_DEPS)
+    #OHOS_3RD_PARTY()
+    message(status "")
 ELSE()
 # Common to all platforms except android:
     FIND_PACKAGE(Freetype)
@@ -819,7 +848,7 @@ INCLUDE(OsgMacroUtils)
 
 
 #optional example related dependencies
-IF(BUILD_OSG_EXAMPLES AND NOT ANDROID)
+IF(BUILD_OSG_EXAMPLES AND NOT ANDROID AND NOT OHOS)
 
     FIND_PACKAGE(FLTK)
     FIND_PACKAGE(FOX)
@@ -1185,7 +1214,7 @@ ENDIF()
 # OSG Core
 ADD_SUBDIRECTORY(src)
 
-IF   (BUILD_OSG_APPLICATIONS AND NOT ANDROID)
+IF   (BUILD_OSG_APPLICATIONS AND NOT ANDROID AND NOT OHOS)
     ADD_SUBDIRECTORY(applications)
 ENDIF()
 
@@ -1194,7 +1223,7 @@ IF   (BUILD_OSG_EXAMPLES)
 ENDIF()
 
 
-IF(APPLE AND NOT ANDROID)
+IF(APPLE AND NOT ANDROID AND NOT OHOS)
 
     IF(OSG_BUILD_PLATFORM_IPHONE)
 
@@ -1242,7 +1271,6 @@ ENDIF()
 
 
 # For Doxygen
-INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 OPTION(BUILD_DOCUMENTATION "Build OpenSceneGraph reference documentation using doxygen (use: make doc_openscenegraph doc_openthreads)" OFF)
 MARK_AS_ADVANCED(CLEAR BUILD_DOCUMENTATION)
 # To build the documention, you will have to enable it
